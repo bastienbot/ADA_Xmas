@@ -1,0 +1,28 @@
+{
+  "id": "ba71d7bc-bd99-4366-9af0-854ca2663a5e",
+  "name": "ADA_Xmas",
+  "description": null,
+  "default_flow": "Workshop",
+  "flows": [
+    {
+      "name": "Workshop",
+      "description": null,
+      "commands": []
+    }
+  ],
+  "files": [],
+  "functions": [
+    {
+      "name": "Xmas",
+      "description": null,
+      "args": [],
+      "import_url": null,
+      "runtime": "nodejs12.x",
+      "handler": "index.handler",
+      "environment": {},
+      "app_id": null,
+      "version": null
+    }
+  ],
+  "apps": []
+}

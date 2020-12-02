@@ -1,0 +1,151 @@
+
+// Ceci est un commentaire, ils commencent tous par //
+// Le CSML ignore les commentaires, ils sont utiles pour les développeurs :3
+
+// Un chatbot commence toujours par l'étape "start" ci-dessous
+start:
+  // On va saluer l'utilisateur avec la commande `say`
+  say "Salut!"
+  say Typing(3000)
+  say "Je suis Kadobot, le bot qui te trouve des cadeaux hyper classes! 🤙"
+  // On peut poser une question à l'utilisateur et donner des choix de boutons
+  say Question("Tu es prêt.e ?",
+    buttons=[
+      // Vous remarquerez qu'on utilise le mot clé "as", il permet au csml de se souvenir de ce bouton
+      // pour s'en servir plus tard (dans le if)
+      Button("Oui let's gooo! 🔥") as btnOui,
+      Button("Pas tout à fait 😕") as btnNon
+    ])
+  // "hold" indique au chatbot qu'il doit attendre une réponse de l'utilisateur (une phrase ou un click)
+	hold
+  // La réponse de l'utilisateur va arriver dans la variable `event`
+  // Dans le cas présent on va voir ce que contient cette variable en demandant au csml si event "match" le bouton Oui
+  if (event match btnOui) {
+    say "Super allons-y!"
+  } else {
+    say "Pas de soucis, je me tiens à ta disposition!"
+    goto end
+  }
+  
+// ############################################################
+// À toi de jouer maintenant, il va falloir remplir les trous !
+// ############################################################
+// Exercice 0 : Efface la ligne ci-dessous pour commencer le workshop
+  goto end /*
+
+  remember price = false
+  remember cc = false
+  remember theme = false
+
+  say "Afin de trouver le cadeau idéal, laisse moi te poser quelques questions."
+	goto actions
+
+actions:
+  // 1 - Il manque un mot clé pour poser la question
+	???? Question("J'ai une belle sélection de cadeaux mais il y en a certains que j'adore! Est-ce que tu veux que je te montre mes coups de 💖 ? ",
+	buttons=[
+    Button("Avec plaisir! ☺️") as btn_yes,
+		Button("Non je préfère chercher moi-même 😉") as btn_no
+		])
+  // 2 - Indique au chatbot d'attendre la réponse de l'utilisateur ici
+	????
+	if (event match btn_yes) {
+    // 3 - Le chatbot doit se souvenir de la variable `cc`
+		???? cc = true
+	} else {
+		???? cc = false
+	}
+  goto themes
+
+
+// 4 - Il faut nommer l'étape ci-dessous
+????:
+  // 5 - Tu dois ajouter le mot clé manquant pour que ça marche
+  say ????("Est-ce que la personne pour qui tu achèteras le cadeau est plutôt...",
+	buttons=[
+    // 6 - Des mots clés manquent pour afficher des boutons
+    ????("Adepte de jeux vidéos 👾") as btn_jv,
+		????("Fan de lecture 📖") as btn_books,
+		????("Toujours au courant des dernières modes 👗👖") as btn_other
+		])
+  hold
+  // 7 - Il manque le mot clé qui permert de savoir si le clic de l'utilisateur
+  //     correspond au bouton
+  if (event ???? btn_jv) {
+		remember theme = "jv"
+	}
+	else if (event ???? btn_books) {
+		remember theme = "livre"
+	} else {
+    remember theme = "accessoire"
+  }
+
+  // 8 - Si l'utilisateur a choisit les coups de coeur, on veut l'envoyer directement
+  //     vers l'étape des résultats
+  if (cc == true) {
+    ???? results
+  } else {
+    ???? price
+  }
+  
+  
+price:
+  // 9 - Il manque BEAUCOUP de chose ci-dessous
+  ???? ????("Quel est ton budget max ?",
+	????=[
+		Button("10 euros") ???? b10_btn,
+		Button("20 euros") ???? b20_btn,
+		Button("50 euros") ???? b50_btn
+		])
+  hold
+  // 10 - Vérifie si l'utilisateur a cliqué sur le premier bouton, le second ou sur le troisième
+  ???? (event match b10_btn) {
+    remember price = 10
+  } ???? ???? (event match b20_btn) {
+    remember price = 20
+  } ???? {
+    remember price = 50
+  }
+  // 5 - Indique au chatbot qu'il doit se rendre à l'étape results`
+  ???? ????
+
+results:
+	say "Roulement de tambours 🥁"
+	say Typing(3000)
+  if (!price) remember price = 50
+  do res = Fn("Xmas", cc=cc, theme=theme, price=price)
+  do cards = []
+  if (res.length() == 0) {
+    say "Je n'ai pas trouvé de cadeaux, désolé 😔"
+    goto start
+  }
+  foreach (val, index) in res {
+    do newCard = Card(
+      title=val.title,
+      subtitle="{{val.price}}€ - {{val.cc}}",
+      image_url=val.image,
+      buttons=[Button("En savoir plus", payload=val.id.to_string())]
+    )
+    if (index < 6) do cards.push(newCard)
+  }
+  say Carousel(
+    cards = cards
+  )
+  goto moreInfos
+
+moreInfos:
+  hold
+  do tmp = event
+  if (!tmp.is_int()) goto start
+  do present = Fn("Xmas", id=tmp.to_int())
+  if (!present || !present.title) {
+    say "Je n'ai pas trouvé ce livre :-/"
+    goto start
+  }
+  if (present.description) do description = present.description
+  else do description = "Description manquante pour ce cadeau 🤔"
+  say "**{{present.title}}** - {{present.price}}€"
+  say "Synopsis : {{description}}"
+  say Url("Acheter ce cadeau", url="{{present.link}}")
+  say Button("Chercher d'autres cadeaux")
+  goto moreInfos
